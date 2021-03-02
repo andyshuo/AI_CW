@@ -75,14 +75,14 @@ class Player(GomokuAgent):
             return (5,5)
         else:
             value, action = self.max_value(board, -999999,999999, 0)
-            #print(value)
-            #print(action)
+            print(value)
             print(action)
+            #print(action)
             return action
     
     def max_value(self, board,alpha, beta, depth):
         #print(depth)
-        if (winningTest(self.ID, board, self.X_IN_A_LINE) or depth>2):
+        if (winningTest(self.ID, board, self.X_IN_A_LINE) or depth>3):
             return self.evaluate_move(board), (0,0)
         value = -99999
         #board_value = self.evaluate_move(board)
@@ -96,6 +96,7 @@ class Player(GomokuAgent):
         possi_moves = self.find_moves(board)
         possi_moves = list(dict.fromkeys(possi_moves))
         act = None
+        possi_moves = possi_moves
         #possi_moves = possi_moves[:10]
         #print("board value: {board}".format(board=board_value))
         #print("len: {len}".format(len=len(possi_moves)))
@@ -109,13 +110,15 @@ class Player(GomokuAgent):
             value= max(value, tttv)
             board[move[0],move[1]]=0
             if value>=beta: return value, act
-            alpha = min(alpha, value)
+            alpha = max(alpha, value)
         
         return value, act
     
     def min_value(self, board,alpha, beta, depth):
         #print(depth)
-        if (winningTest(self.opp_id,board, self.X_IN_A_LINE) or depth>2):
+        if (winningTest(self.opp_id,board, self.X_IN_A_LINE) or depth>3):
+            #print(board)
+            #print(self.evaluate_move(board))
             return self.evaluate_move(board), (0,0)
         value = 99999
         #board_value = self.evaluate_move(board)
@@ -128,6 +131,7 @@ class Player(GomokuAgent):
         #    possi_moves = self.find_opp_moves(board)
         possi_moves = self.find_moves(board)
         possi_moves = list(dict.fromkeys(possi_moves))
+        possi_moves = possi_moves
         act = None
         #print(board_value)
         #print(len(possi_moves))
@@ -138,7 +142,7 @@ class Player(GomokuAgent):
             act = move
             tttv, ttta = self.max_value(board, alpha, beta, depth+1)
             #print("{value},{action}, {depth}".format(value = tttv, action = ttta, depth=depth))
-            value= max(value, tttv)
+            value= min(value, tttv)
             board[move[0],move[1]]=0
             if value <=alpha: return value, act
             beta = min(beta, value)
@@ -185,7 +189,7 @@ class Player(GomokuAgent):
                             list_of_moves.append((r+1,c))
                         if legalMove(board, (r+1,c+1)):
                             list_of_moves.append((r+1,c+1))
-            
+            random.shuffle(list_of_moves)
             return list_of_moves
     
     def find_my_moves(self, board):
@@ -371,12 +375,14 @@ class Player(GomokuAgent):
         return value
 
     def evaluate_move(self, board):
-        value = 0
+        value = 1
         hori_seen=[]
         vert_seen=[]
         diag_1_seen=[]
         diag_2_seen=[]
+        print(value)
         for r in range(len(board)):
+            #print(value)
             for c in range(len(board)):
                 
                 if board[r,c]!=0:
@@ -400,11 +406,14 @@ class Player(GomokuAgent):
                             hori_seen = self.check_seen_hori(hori, mine, hori_seen, r,c)
                         elif count==3:
                             value+= self.check_pattern(mine, hori, self.winning_three, self.defend_three)
+                            print(value)
+                            print("check")
                             hori_seen = self.check_seen_hori(hori, mine, hori_seen, r,c)
                         elif count==2:
                             value+= self.check_pattern(mine, hori, self.two, self.defend_two)
                             hori_seen = self.check_seen_hori(hori, mine, hori_seen, r,c)
                             #print("check")
+                    #print(value)
                     count = np.sum(vert==self.ID)
                     if not ((r,c) in vert_seen):
                         if count ==4:
@@ -443,29 +452,38 @@ class Player(GomokuAgent):
                             diag_2_seen = self.check_seen_diag_2(diag_2, mine, diag_2_seen,r,c )
                             #print(diag_2_seen)
                             #print("check")
-
+                    print("hi"+str(value))
+                #print(value)
+        #print(value)
         return value
                 
     def check_pattern(self, is_my_stone, ls, states_1, states_2):
         value =0
         if is_my_stone:
             for state in states_1[0]:
+                #print("---------------------")
                 N = len(state)
                 possibles = np.where(state[0]==ls)[0]
                 for p in possibles:
                     check=ls[p:p+N]
                     if np.all(check==state):
                         value+=states_1[1]
-                    
+                #print("---------------------")
             
             for state in states_2[0]:
+                #print("---------------------")
                 N = len(state)
                 possibles = np.where(state[0]==ls)[0]
                 
+                
                 for p in possibles:
                     check=ls[p:p+N]
+                    #print(check)
+                    #print(state)
                     if np.all(check==state):
+                        #print("hi")
                         value+=states_2[1]
+                #print("---------------------")
             
         else:
 
@@ -485,6 +503,7 @@ class Player(GomokuAgent):
                     check=ls[p:p+N]
                     if np.all(check==state):
                         value-=states_2[1]
+        #print(value)
         return value
 
     def flip_states(self, states):
