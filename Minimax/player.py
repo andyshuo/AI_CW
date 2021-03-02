@@ -20,149 +20,174 @@ class Player(GomokuAgent):
         self.BOARDSIZE=BOARDSIZE
         self.X_IN_A_LINE=X_IN_A_LINE
         
-        self.winning_states = ([
-        
-        
-                            [ID,ID,ID,ID,0],
-                            [ID,ID,ID,0,ID],
-                            [ID,ID,0,ID,ID],
-                            [ID,0,ID,ID,ID],
-                            [0,ID,ID,ID,ID]
-                            ],99999)
-        self.one_step_to_winning = ([
+        self.winning_states = ([[0,ID,ID,ID,ID,0]],10000)
+        self.defend_winning_states = ([
+                                        [-ID,ID,ID,ID,ID,0],
+                                        [0,ID,ID,ID,ID,-ID],
+                                        [ID,ID,ID,0,ID],
+                                        [ID,ID,-ID,ID,ID]
+                                        ],9000)
+        self.winning_three = ([
+                                [ID,ID,ID],
+                                [ID,ID,0,ID],
+                                [ID,0,ID,ID]
+                                ],5000)
+        self.defend_three = ([
+                                [-ID,ID,ID,ID,0,0],
+                                [0,0,ID,ID,ID,-ID],
                                 [-ID,ID,ID,0,ID,0],
-                                [ID,ID,0,ID,0],
-                                [-ID,ID,0,ID,ID,0],
-                                [ID,0,ID,ID,0],
-                                [0,ID,ID,ID,0],
-                                [0,ID,ID,0,ID,-ID],
-                                [0,ID,ID,0,ID],
                                 [0,ID,0,ID,ID,-ID],
-                                [0,ID,0,ID,ID]
-                                ],1000)
+                                [-ID,ID,0,ID,ID,0],
+                                [0,ID,ID,0,ID,-ID],
+                                [ID,ID,0,0,ID],
+                                [ID,0,0,ID,ID],
+                                [ID,0,ID,0,ID],
+                                [-ID,0,ID,ID,ID,0,-ID],
+                                ],3000)
+        self.two = ([
+                    [0,0,ID,ID,0,0],
+                    [0,ID,0,ID,0],
+                    [0,ID,0,0,ID,0],
+                    ],700)
+                    
+        self.defend_two = ([
+                            [-ID,ID,ID,0,0,0],
+                            [-ID,ID,0,ID,0,0],
+                            [-ID,ID,0,0,ID],
+                            [ID,0,0,0,ID],
+                            [0,0,0,ID,ID,-ID],
+                            [0,0,ID,0,ID,-ID],
+                            [ID,0,0,ID,-ID]
+                            ],70)
         
-        self.defend_one_step_to_winning = ([
-                                        [-ID,ID,ID,ID,0,0],
-                                        [ID,ID,ID,0,0],
-                                        [-ID,ID,ID,0,ID,0],
-                                        [ID,ID,0,ID,0],
-                                        [0,ID,ID,0,ID,-ID],
-                                        [0,ID,ID,0,ID],
-                                        [0,ID,0,ID,ID,-ID],
-                                        [0,ID,0,ID,ID],
-                                        [0,0,ID,ID,ID,-ID],
-                                        [0,0,ID,ID,ID],
-                                        [ID,0,ID,0,ID],
-                                        [ID,0,0,ID,ID],
-                                        [ID,ID,0,0,ID],
-                                        [ID,ID,0,0,ID,ID]       
-                                        ],10)
-        self.two_step_to_winning = ([
-                                [-ID,ID,ID,0,0,0],
-                                [ID,ID,0,0,0],
-                                [-ID,ID,0,ID,0,0],
-                                [ID,0,ID,0,0],
-                                [-ID,0,ID,ID,0,0],
-                                [0,ID,ID,0,0],
-                                [0,ID,0,ID,0],
-                                [0,0,ID,ID,0,-ID],
-                                [0,0,ID,ID,0],
-                                [0,0,ID,0,ID,-ID],
-                                [0,0,ID,0,ID],
-                                [0,0,0,ID,ID,-ID],
-                                [0,0,0,ID,ID],
-                                [ID,0,0,0,ID],
-                                [0,ID,0,0,ID,0],
-                                [-ID,ID,0,0,ID,0],
-                                [ID,0,0,ID,0],
-                                [0,ID,0,0,ID,-ID],
-                                [0,ID,0,0,ID]
-                                ],3)
         self.opp_winning_states = self.flip_states(deepcopy(self.winning_states))
         #print(self.opp_winning_states)
-        self.opp_one_step_to_winning = self.flip_states(deepcopy(self.one_step_to_winning))
-        self.opp_defend_one_step_to_winning = self.flip_states(deepcopy(self.defend_one_step_to_winning))
-        self.opp_two_step_to_winning= self.flip_states(deepcopy(self.two_step_to_winning))
-        self.opp_all_states = [self.opp_winning_states,self.opp_one_step_to_winning,self.opp_defend_one_step_to_winning,self.opp_two_step_to_winning]
-        self.all_states = [self.winning_states, self.one_step_to_winning, self.defend_one_step_to_winning, self.two_step_to_winning]
+        self.opp_defend_winning_states = self.flip_states(deepcopy(self.defend_winning_states))
+        self.opp_winning_three = self.flip_states(deepcopy(self.winning_three))
+        self.opp_defend_three= self.flip_states(deepcopy(self.defend_three))
+        self.opp_two=self.flip_states(deepcopy(self.two))
+        self.opp_defend_two = self.flip_states(deepcopy(self.defend_two))
+        self.opp_all_states = [self.opp_winning_states,self.opp_defend_winning_states,self.opp_winning_three,self.opp_defend_three, self.opp_two, self.opp_defend_two]
+        self.all_states = [self.winning_states, self.defend_winning_states, self.winning_three, self.defend_three, self.two, self.defend_two]
     
     def move(self,board):
         if self.all_zeros(board):
             return (5,5)
         else:
-            print("----------------------------------")
-            ls = []
-            temp_v = self.evaluate_board(board)
-            if temp_v>=0:
-                possi_moves=self.find_my_moves(board)
-            else:
-                possi_moves=self.find_opp_moves(board)
-            for move in possi_moves:
-                board[move[0],move[1]]=self.ID
-                ls.append((move, self.min_value(board,0,-999999,999999)))
-                board[move[0],move[1]]=0
-            print("----------------------------------")
-            return max(ls, key= lambda item:[1])[0]
+            value, action = self.max_value(board, -999999,999999, 0)
+            #print(value)
+            #print(action)
+            print(action)
+            return action
     
-    def max_value(self, board, depth, alpha, beta):
-        print("depth is:{d}".format(d=depth))
-        
-        if depth==2:
-            return self.evaluate_board( board)
-        if winningTest(self.opp_id, board, self.X_IN_A_LINE):
-            return self.evaluate_board(board)
+    def max_value(self, board,alpha, beta, depth):
+        #print(depth)
+        if (winningTest(self.ID, board, self.X_IN_A_LINE) or depth>2):
+            return self.evaluate_move(board), (0,0)
         value = -99999
-        temp_v = self.evaluate_board(board)
-        print("max")
-        print(board)
-        print("value is: {v}".format(v=temp_v))
-        if temp_v>=0:
-            possi_moves = self.find_my_moves(board)
-        else:
-            possi_moves = self.find_opp_moves(board)
+        #board_value = self.evaluate_move(board)
+        
+        #if self.no_my_stones(board):
+        #    possi_moves = self.find_opp_moves(board)
+        #elif board_value<70 and board_value>=0:
+        #    possi_moves = self.find_my_moves(board)
+        #else:
+        #    possi_moves=self.find_opp_moves(board)
+        possi_moves = self.find_moves(board)
+        possi_moves = list(dict.fromkeys(possi_moves))
+        act = None
+        #possi_moves = possi_moves[:10]
+        #print("board value: {board}".format(board=board_value))
+        #print("len: {len}".format(len=len(possi_moves)))
+        
         for move in possi_moves:
-            print("({r},{c})".format(r=move[0], c=move[1]))
+        
             board[move[0],move[1]]=self.ID
-            
-            value= max(value, self.min_value(board,depth+1, alpha, beta))
+            act = move
+            tttv, ttta = self.min_value(board, alpha,beta,depth+1)
+            #print("{value},{action}, {depth}".format(value = tttv, action = move, depth=depth))
+            value= max(value, tttv)
             board[move[0],move[1]]=0
-            print(beta)
-            if value>=beta:
-                return value
-            alpha = max(alpha, value)
-        return value
-    
-    def min_value(self, board, depth, alpha, beta):
-        print("depth is:{d}".format(d=depth))
-        if depth==2:
-            return self.evaluate_board(board)
-        if winningTest(self.ID, board, self.X_IN_A_LINE):
-            return self.evaluate_board(board)
-        value=99999
+            if value>=beta: return value, act
+            alpha = min(alpha, value)
         
-        temp_v = self.evaluate_board(board)
-        print("min")
-        print(board)
-        print("value is: {v}".format(v=temp_v))
-        if temp_v<0:
-            possi_moves = self.find_opp_moves(board)
-        else:
-            possi_moves = self.find_my_moves(board)
+        return value, act
+    
+    def min_value(self, board,alpha, beta, depth):
+        #print(depth)
+        if (winningTest(self.opp_id,board, self.X_IN_A_LINE) or depth>2):
+            return self.evaluate_move(board), (0,0)
+        value = 99999
+        #board_value = self.evaluate_move(board)
+        
+        #if board_value>-70 and board_value<0:
+        #    possi_moves = self.find_opp_moves(board)
+        #elif board_value>=0:
+        #    possi_moves = self.find_my_moves(board)
+        #else:
+        #    possi_moves = self.find_opp_moves(board)
+        possi_moves = self.find_moves(board)
+        possi_moves = list(dict.fromkeys(possi_moves))
+        act = None
+        #print(board_value)
+        #print(len(possi_moves))
+        #possi_moves = possi_moves[:10]
         
         for move in possi_moves:
-            print("({r},{c})".format(r=move[0], c=move[1]))
             board[move[0],move[1]]=self.opp_id
-            
-            value = min(value, self.max_value(board,depth+1, alpha, beta))
+            act = move
+            tttv, ttta = self.max_value(board, alpha, beta, depth+1)
+            #print("{value},{action}, {depth}".format(value = tttv, action = ttta, depth=depth))
+            value= max(value, tttv)
             board[move[0],move[1]]=0
-            if value<=alpha:
-                return value
+            if value <=alpha: return value, act
             beta = min(beta, value)
-        return value
+        return value, act
     
     #def move(self, board):
        # return (0,0)
-        
+    
+    def no_my_stones(self,board):
+        for r in range(len(board)):
+            for c in range(len(board)):
+                if board[r,c]==self.ID:
+                    return False
+        return True
+    
+    def find_moves(self,board):
+        if self.all_zeros(board):
+            return [(5,5)]
+        elif self.no_my_stones(board):
+            if legalMove(board, (5,5)):
+                return [(5,5)]
+            elif legalMove(board,(5,6)):
+                return [(5,6)]
+        else:
+            list_of_moves=[]
+            for r in range(len(board)):
+                for c in range(len(board)):
+                    if board[r,c]!=0:
+                        if legalMove(board, (r-1,c-1)):
+                            list_of_moves.append((r-1,c-1))
+                        if legalMove(board, (r-1,c)):
+                            list_of_moves.append((r-1,c))
+                        if legalMove(board, (r-1,c+1)):
+                            list_of_moves.append((r-1,c+1))
+                        if legalMove(board, (r,c-1)):
+                            list_of_moves.append((r,c-1))
+                        if legalMove(board, (r,c)):
+                            list_of_moves.append((r-1,c))
+                        if legalMove(board, (r,c+1)):
+                            list_of_moves.append((r,c+1))
+                        if legalMove(board, (r+1,c-1)):
+                            list_of_moves.append((r+1,c-1))
+                        if legalMove(board, (r+1,c)):
+                            list_of_moves.append((r+1,c))
+                        if legalMove(board, (r+1,c+1)):
+                            list_of_moves.append((r+1,c+1))
+            
+            return list_of_moves
+    
     def find_my_moves(self, board):
         if self.all_zeros(board):
             return [(5,5)]
@@ -195,7 +220,7 @@ class Player(GomokuAgent):
                         if r!=10 and c!=10: 
                             if board[r+1,c+1]==0:
                                 list_of_moves.append((r+1,c+1))
-            print("length: {l}".format(l=len(list_of_moves)))
+            #print("length: {l}".format(l=len(list_of_moves)))
             random.shuffle(list_of_moves)
             return list_of_moves
     
@@ -231,7 +256,7 @@ class Player(GomokuAgent):
                         if r!=10 and c!=10: 
                             if board[r+1,c+1]==0:
                                 list_of_moves.append((r+1,c+1))
-            print("length: {l}".format(l=len(list_of_moves)))
+            #print("length: {l}".format(l=len(list_of_moves)))
             random.shuffle(list_of_moves)
             return list_of_moves
     
@@ -342,38 +367,125 @@ class Player(GomokuAgent):
                     value+=1
                 elif board[r][c]==self.opp_id:
                     value-=1
-                
-        #end_time = time.time()
-        #print("{time} ms".format(time = end_time-start_time))
-        #print(value)
+
         return value
 
-    def evaluate_move(self, board, r, c):
-        horis = []
-        for i in range(4):
-            if not c-i<0 and not c+i>10:
-                horis.append(board[r,c-i:c-i+5])
-                horis.append(board[r,c+i:c+i+5])
-                #print(board[r,c-i:c-i+5])
-                #print(board[r,c+i:c+i+5])
-        verts = []
-        for i in range(4):
-            if not r-i<0 and not r+i>10:
-                verts.append(board[r-i:r-i+5,c])
-                verts.append(board[r+i:r+i+5,c])
+    def evaluate_move(self, board):
+        value = 0
+        hori_seen=[]
+        vert_seen=[]
+        diag_1_seen=[]
+        diag_2_seen=[]
+        for r in range(len(board)):
+            for c in range(len(board)):
                 
-        diag_1 = []
-        for i in range(4):
-            if not r-i<0 and not c-i<0 and not r+i>10 and not c+i>10:
-                diag_1.append(board[r-i:r-i+5,c-i:c-i+5])
-                diag_1.append(board[r+i:r+i+5,c+i:c+i+5])
+                if board[r,c]!=0:
+                    if board[r,c]==self.ID:
+                        mine = True
+                    else:
+                        mine = False
+                    
+                    hori = board[r]
+                    vert = board[:,c]
+                    diag_1 = np.array(board).diagonal(c-r)
+                    diag_2 = np.fliplr(np.array(board)).diagonal((10-c)-r)
+
+                    count = np.sum(hori==self.ID)
+                    #print((r,c))
+                    #print((r,c)in hori_seen)
+                    #print(hori_seen)
+                    if not ((r,c) in hori_seen):
+                        if count ==4:
+                            value+= self.check_pattern(mine, hori, self.winning_states, self.defend_winning_states)
+                            hori_seen = self.check_seen_hori(hori, mine, hori_seen, r,c)
+                        elif count==3:
+                            value+= self.check_pattern(mine, hori, self.winning_three, self.defend_three)
+                            hori_seen = self.check_seen_hori(hori, mine, hori_seen, r,c)
+                        elif count==2:
+                            value+= self.check_pattern(mine, hori, self.two, self.defend_two)
+                            hori_seen = self.check_seen_hori(hori, mine, hori_seen, r,c)
+                            #print("check")
+                    count = np.sum(vert==self.ID)
+                    if not ((r,c) in vert_seen):
+                        if count ==4:
+                            value+= self.check_pattern(mine, vert, self.winning_states, self.defend_winning_states)
+                            vert_seen = self.check_seen_vert(vert, mine, vert_seen, r,c)
+                        elif count==3:
+                            value+= self.check_pattern(mine, vert, self.winning_three, self.defend_three)
+                            vert_seen = self.check_seen_vert(vert, mine, vert_seen, r,c)
+                        elif count==2:
+                            value+= self.check_pattern(mine, vert, self.two, self.defend_two)
+                            vert_seen = self.check_seen_vert(vert, mine, vert_seen, r,c)
+                            #print("check")
+                    count = np.sum(diag_1==self.ID)
+                    if not ((r,c)in diag_1_seen):
+                    
+                        if count ==4:
+                            value+= self.check_pattern(mine, diag_1, self.winning_states, self.defend_winning_states)
+                            diag_1_seen = self.check_seen_diag_1(diag_1, mine, diag_1_seen,r,c )
+                        elif count==3:
+                            value+= self.check_pattern(mine, diag_1, self.winning_three, self.defend_three)
+                            diag_1_seen = self.check_seen_diag_1(diag_1, mine, diag_1_seen,r,c )
+                        elif count==2:
+                            value+= self.check_pattern(mine, diag_1, self.two, self.defend_two)
+                            diag_1_seen = self.check_seen_diag_1(diag_1, mine, diag_1_seen,r,c )
+                            #print("check")
+                    count = np.sum(diag_2==self.ID)
+                    if not ((r,c) in diag_2_seen):
+                        if count ==4:
+                            value+= self.check_pattern(mine, diag_2, self.winning_states, self.defend_winning_states)
+                            diag_2_seen = self.check_seen_diag_2(diag_2, mine, diag_2_seen,r,c )
+                        elif count==3:
+                            value+= self.check_pattern(mine, diag_2, self.winning_three, self.defend_three)
+                            diag_2_seen = self.check_seen_diag_2(diag_2, mine, diag_2_seen,r,c )
+                        elif count==2:
+                            value+= self.check_pattern(mine, diag_2, self.two, self.defend_two)
+                            diag_2_seen = self.check_seen_diag_2(diag_2, mine, diag_2_seen,r,c )
+                            #print(diag_2_seen)
+                            #print("check")
+
+        return value
+                
+    def check_pattern(self, is_my_stone, ls, states_1, states_2):
+        value =0
+        if is_my_stone:
+            for state in states_1[0]:
+                N = len(state)
+                possibles = np.where(state[0]==ls)[0]
+                for p in possibles:
+                    check=ls[p:p+N]
+                    if np.all(check==state):
+                        value+=states_1[1]
+                    
             
-        diag_2 = []
-        for i in range(4):
-            if not r-i<0 and not c-i<0 and not r+i>10 and not c+i>10:
-                diag_2.append(board[r-i:r-i+5,c+i:c+i+5])
-                diag_2.append(board[r+i:r+i+5,c-i:c-i+5])
-        
+            for state in states_2[0]:
+                N = len(state)
+                possibles = np.where(state[0]==ls)[0]
+                
+                for p in possibles:
+                    check=ls[p:p+N]
+                    if np.all(check==state):
+                        value+=states_2[1]
+            
+        else:
+
+            for state in states_1[0]:
+                N = len(state)
+                possibles = np.where(state[0]==ls)[0]
+                for p in possibles:
+                    check=ls[p:p+N]
+                    if np.all(check==state):
+                        value-=states_1[1]
+                    
+
+            for state in states_2[0]:
+                N = len(state)
+                possibles = np.where(state[0]==ls)[0]
+                for p in possibles:
+                    check=ls[p:p+N]
+                    if np.all(check==state):
+                        value-=states_2[1]
+        return value
 
     def flip_states(self, states):
         for state in states[0]:
@@ -384,4 +496,50 @@ class Player(GomokuAgent):
                     state[i]=-1
         return states
                 
+    def check_seen_hori(self,ls,mine, seen,r,c):
+        if mine:
+            temp = np.where(ls==self.ID)
+            for y,x in zip(np.full(len(temp[0]), r),temp[0]):
+                seen.append((y,x))
+        else:
+            temp = np.where(ls==self.opp_id)
+            for y,x in zip(np.full(len(temp[0]), r),temp[0]):
+                seen.append((y,x))
+        return seen
     
+    def check_seen_vert(self,ls,mine,seen,r,c):
+        if mine:
+            temp = np.where(ls==self.ID)
+            for y,x in zip(temp[0], np.full(len(temp[0]), c)):
+                seen.append((y,x))
+        else:
+            temp = np.where(ls==self.opp_id)
+            for y,x in zip(temp[0], np.full(len(temp[0]), c)):
+                seen.append((y,x))
+        return seen        
+    
+    def check_seen_diag_1(self, ls,mine, seen,r,c):
+        if mine:
+            temp = np.where(ls==self.ID)
+            for y,x in zip(temp[0],np.arange(c,c+len(temp[0]))):
+                seen.append((y,x))
+        else:
+            temp = np.where(ls==self.opp_id)
+            for y,x in zip(temp[0],np.arange(c,c+len(temp[0]))):
+                seen.append((y,x))
+        return seen 
+        
+    def check_seen_diag_2(self, ls,mine, seen, r,c):
+        if mine:
+            temp = np.where(ls==self.ID)
+            #print("Hi")
+            #print(ls)
+            for y,x in zip(temp[0], np.flip(np.arange(c-len(temp[0])+1,c+1),0)):
+                #print((y,x))
+                seen.append((y,x))
+        else:
+            temp = np.where(ls==self.opp_id)
+            for y,x in zip(temp[0], np.flip(np.arange(c-len(temp[0])+1,c+1),0)):
+                #print((y,x))
+                seen.append((y,x))
+        return seen 
