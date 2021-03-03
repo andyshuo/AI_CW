@@ -13,10 +13,7 @@ import random
 class Player(GomokuAgent):
     def __init__(self,ID,BOARDSIZE,X_IN_A_LINE):
         self.ID=ID
-        #print(self.ID)
-        
         self.opp_id=self.gen_opp_id(self.ID)
-        #print(self.opp_id)
         self.BOARDSIZE=BOARDSIZE
         self.X_IN_A_LINE=X_IN_A_LINE
         self.win=([[ID,ID,ID,ID,ID]],100000)
@@ -50,7 +47,6 @@ class Player(GomokuAgent):
                     [0,ID,0,ID,0],
                     [0,ID,0,0,ID,0],
                     ],100)
-                    
         self.defend_two = ([
                             [-ID,ID,ID,0,0,0],
                             [-ID,ID,0,ID,0,0],
@@ -62,17 +58,11 @@ class Player(GomokuAgent):
                             ],10)
         self.opp_win = self.flip_states(deepcopy(self.win))
         self.opp_winning_states = self.flip_states(deepcopy(self.winning_states))
-        #print(self.opp_winning_states)
         self.opp_defend_winning_states = self.flip_states(deepcopy(self.defend_winning_states))
         self.opp_winning_three = self.flip_states(deepcopy(self.winning_three))
         self.opp_defend_three= self.flip_states(deepcopy(self.defend_three))
         self.opp_two=self.flip_states(deepcopy(self.two))
-        #print("1111111")
-        #print(self.opp_two)
-        #print("1111111")
         self.opp_defend_two = self.flip_states(deepcopy(self.defend_two))
-        
-        
     
     def move(self,board):
         if self.all_zeros(board):
