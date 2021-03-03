@@ -74,6 +74,7 @@ class Player(GomokuAgent):
                             [0,0,ID,0,ID,-ID],
                             [ID,0,0,ID,-ID]
                             ],10)
+                            
         # The below is just flipping the 1s and -1s for checking opponents patterns.
         self.opp_win = self.flip_states(deepcopy(self.win))
         self.opp_winning_states = self.flip_states(deepcopy(self.winning_states))
@@ -92,20 +93,24 @@ class Player(GomokuAgent):
             return action
     
     def max_value(self, board,alpha, beta, depth):
-        
         if (winningTest(self.opp_id, board, self.X_IN_A_LINE)or depth==2):
             # Depth 2 was chosen to terminate, the AI will lose because of timeout if I go deeper
             return (self.evaluate_move(board), (0,0))
+            
         value = -99999999
+        
         possi_moves = self.find_moves(board, True)
         possi_moves = list(dict.fromkeys(possi_moves)) # Remove duplicates
+        
         best = (value,(0,0))
         for move, v in possi_moves:
             board[move[0],move[1]]=self.ID
             va, act = self.min_value(board, alpha,beta,depth+1)
             cur_value = (va, move)
+            
             best = max(best, cur_value, key=lambda item:item[0])
             board[move[0],move[1]]=0
+            
             if best[0]>=beta: 
                 return best
             alpha = max(alpha, best[0])
@@ -114,16 +119,21 @@ class Player(GomokuAgent):
     def min_value(self, board,alpha, beta, depth):
         if (winningTest(self.ID,board, self.X_IN_A_LINE)):
             return (self.evaluate_move(board), (0,0))
+            
         value = 99999999
+        
         possi_moves = self.find_moves(board, False)
         possi_moves = list(dict.fromkeys(possi_moves))
+        
         best = (value,(0,0))
         for move, v in possi_moves:
             board[move[0],move[1]]=self.opp_id
             va, act = self.max_value(board, alpha, beta, depth+1)
             cur_value = (va, move)
+            
             best = min(best, cur_value, key=lambda item: item[0])
             board[move[0],move[1]]=0
+            
             if best[0] <=alpha:
                 return best
             beta = min(beta, best[0])
@@ -168,7 +178,6 @@ class Player(GomokuAgent):
                                 board[r-1,c-1]=self.opp_id
                                 list_of_moves.append(((r-1,c-1), self.evaluate_move(board)))
                                 board[r-1,c-1]=0
-                            
                         if legalMove(board, (r-1,c)):
                             if mine:
                                 board[r-1,c]=self.ID
