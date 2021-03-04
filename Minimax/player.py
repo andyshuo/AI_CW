@@ -33,6 +33,7 @@ class Player(GomokuAgent):
         
         
         # The below are the patterns and the corresponding values.
+        # The values is decided by trial and errors and some basic understanding to the game.
         
         self.win=([[ID,ID,ID,ID,ID]],100000)
         self.winning_states = ([[0,ID,ID,ID,ID,0]],10000)
