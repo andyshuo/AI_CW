@@ -101,7 +101,6 @@ class Player(GomokuAgent):
         
         possi_moves = self.find_moves(board, True)
         possi_moves = list(dict.fromkeys(possi_moves)) # Remove duplicates
-        
         best = (value,(0,0))
         for move, v in possi_moves:
             board[move[0],move[1]]=self.ID
@@ -155,7 +154,7 @@ class Player(GomokuAgent):
         Attributes:
             mine: boolean
                 this is just to differ from max and min for evalution.
-            
+        
         """
         if self.all_zeros(board):
             return [((5,5),0)]
@@ -165,98 +164,71 @@ class Player(GomokuAgent):
             elif legalMove(board,(5,6)):
                 return [((5,6),0)]
         else:
-            list_of_moves=[]
+            list_of_moves=[] # this is a list of (move, value) tuples
             for r in range(len(board)):
                 for c in range(len(board)):
                     if board[r,c]!=0:
-                        if legalMove(board, (r-1,c-1)):
-                            if mine:
-                                board[r-1,c-1]=self.ID
-                                list_of_moves.append(((r-1,c-1), self.evaluate_move(board)))
-                                board[r-1,c-1]=0
-                            else:
-                                board[r-1,c-1]=self.opp_id
-                                list_of_moves.append(((r-1,c-1), self.evaluate_move(board)))
-                                board[r-1,c-1]=0
-                        if legalMove(board, (r-1,c)):
-                            if mine:
-                                board[r-1,c]=self.ID
-                                list_of_moves.append(((r-1,c), self.evaluate_move(board)))
-                                board[r-1,c]=0
-                            else:
-                                board[r-1,c]=self.opp_id
-                                list_of_moves.append(((r-1,c), self.evaluate_move(board)))
-                                board[r-1,c]=0
-                        if legalMove(board, (r-1,c+1)):
-                            if mine:
-                                board[r-1,c+1]=self.ID
-                                list_of_moves.append(((r-1,c+1), self.evaluate_move(board)))
-                                board[r-1,c+1]=0
-                            else:
-                                board[r-1,c+1]=self.opp_id
-                                list_of_moves.append(((r-1,c+1), self.evaluate_move(board)))
-                                board[r-1,c+1]=0
-                        if legalMove(board, (r,c-1)):
-                            if mine:
-                                board[r,c-1]=self.ID
-                                list_of_moves.append(((r,c-1), self.evaluate_move(board)))
-                                board[r,c-1]=0
-                            else:
-                                board[r,c-1]=self.opp_id
-                                list_of_moves.append(((r,c-1), self.evaluate_move(board)))
-                                board[r,c-1]=0
-                        if legalMove(board, (r,c)):
-                            if mine:
-                                board[r,c]=self.ID
-                                list_of_moves.append(((r,c), self.evaluate_move(board)))
-                                board[r,c]=0
-                            else:
-                                board[r,c]=self.opp_id
-                                list_of_moves.append(((r,c), self.evaluate_move(board)))
-                                board[r,c]=0
-                        if legalMove(board, (r,c+1)):
-                            if mine:
-                                board[r,c+1]=self.ID
-                                list_of_moves.append(((r,c+1), self.evaluate_move(board)))
-                                board[r,c+1]=0
-                            else:
-                                board[r,c+1]=self.opp_id
-                                list_of_moves.append(((r,c+1), self.evaluate_move(board)))
-                                board[r,c+1]=0
-                        if legalMove(board, (r+1,c-1)):
-                            if mine:
-                                board[r+1,c-1]=self.ID
-                                list_of_moves.append(((r+1,c-1), self.evaluate_move(board)))
-                                board[r+1,c-1]=0
-                            else:
-                                board[r+1,c-1]=self.opp_id
-                                list_of_moves.append(((r+1,c-1), self.evaluate_move(board)))
-                                board[r+1,c-1]=0
-                        if legalMove(board, (r+1,c)):
-                            if mine:
-                                board[r+1,c]=self.ID
-                                list_of_moves.append(((r+1,c), self.evaluate_move(board)))
-                                board[r+1,c]=0
-                            else:
-                                board[r+1,c]=self.opp_id
-                                list_of_moves.append(((r+1,c), self.evaluate_move(board)))
-                                board[r+1,c]=0
-                        if legalMove(board, (r+1,c+1)):
-                            if mine:
-                                board[r+1,c+1]=self.ID
-                                list_of_moves.append(((r+1,c+1), self.evaluate_move(board)))
-                                board[r+1,c+1]=0
-                            else:
-                                board[r+1,c+1]=self.opp_id
-                                list_of_moves.append(((r+1,c+1), self.evaluate_move(board)))
-                                board[r+1,c+1]=0
+                        list_of_moves = list_of_moves+self.get_moves_from_a_position(board, r,c, mine)
             if mine:
                 list_of_moves.sort(key = lambda item:item[1], reverse=True)
             else:
                 list_of_moves.sort(key = lambda item:item[1])
             return list_of_moves[:20] # list_of_moves is truncated to top 20 moves for efficiency.
 
-
+    def get_move_result(self, board, r, c, id):
+        board[r,c]=id
+        value =  self.evaluate_move(board)
+        board[r,c]=0
+        return ((r,c), value)
+        
+    def get_moves_from_a_position(self, board, r,c, mine):
+        list_of_moves=[]
+        if legalMove(board, (r-1,c-1)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r-1,c-1,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r-1,c-1,self.opp_id)]
+        if legalMove(board, (r-1,c)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r-1,c,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r-1,c,self.opp_id)]
+        if legalMove(board, (r-1,c+1)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r-1,c+1,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r-1,c+1,self.opp_id)]
+        if legalMove(board, (r,c-1)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r,c-1,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r,c-1,self.opp_id)]
+        if legalMove(board, (r,c)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r,c,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r,c,self.opp_id)]
+        if legalMove(board, (r,c+1)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r,c+1,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r,c+1,self.opp_id)]
+        if legalMove(board, (r+1,c-1)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r+1,c-1,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r+1,c-1,self.opp_id)]
+        if legalMove(board, (r+1,c)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r+1,c,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r+1,c,self.opp_id)]
+        if legalMove(board, (r+1,c+1)):
+            if mine:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r+1,c+1,self.ID)]
+            else:
+                list_of_moves = list_of_moves+[self.get_move_result(board,r+1,c+1,self.opp_id)]
+        return list_of_moves
     
     def all_zeros(self, board):
         # Check if there are no stones on the board.
@@ -299,6 +271,7 @@ class Player(GomokuAgent):
                     diag_1 = np.array(board).diagonal(c-r)
                     diag_2 = np.fliplr(np.array(board)).diagonal((10-c)-r)
                     mine = True # This is to differ from max and mini.
+                    # Below has 8 parts of codes. It includes checking patterns in four directions with different number of stones in every direction for both players.
                     if board[r,c]==self.ID:
                         count = np.sum(hori==self.ID) # Count is to map from to different subset of patterns.
                         if not ((r,c) in hori_seen): 
@@ -458,9 +431,8 @@ class Player(GomokuAgent):
                     state[i]=-1
         return states
     
-    """
-    The below four function is to mark seen positions. 
-    """
+    
+    #The below four function is to mark seen positions. 
     def check_seen_hori(self,ls,mine, seen,r,c):
         if mine:
             temp = np.where(ls==self.ID)
